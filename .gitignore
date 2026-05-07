@@ -1,0 +1,38 @@
+# .gitignore – KYU Chatbot
+
+# ── Secrets ───────────────────────────────────────────────────────────────────
+.env
+
+# ── Python ────────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+env/
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# ── Data (large files – add to Git LFS if needed) ────────────────────────────
+data/raw/
+data/cleaned/
+data/chunks/
+chroma_db/
+mirror/
+
+# ── Logs ─────────────────────────────────────────────────────────────────────
+logs/
+
+# ── OS ────────────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+*.swp
+
+# ── IDE ───────────────────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.iml
