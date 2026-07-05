@@ -185,6 +185,16 @@ def save_chunks_json(chunks: list[dict]) -> None:
 
 
 def main() -> None:
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Embed cleaned docs into ChromaDB")
+    parser.add_argument(
+        "--rebuild",
+        action="store_true",
+        help="Delete existing collection and re-embed all chunks from scratch",
+    )
+    args = parser.parse_args()
+
     log.info("═══ KYU Embedder starting ═══")
 
     cleaned_files = sorted(CLEANED_DIR.glob("*.md"))
@@ -194,13 +204,26 @@ def main() -> None:
 
     log.info(f"Found {len(cleaned_files)} cleaned files.")
 
-    # 1. Chunk
     log.info("Chunking documents …")
     chunks = chunk_documents(cleaned_files)
     log.info(f"Total chunks: {len(chunks)}")
     save_chunks_json(chunks)
 
-    # 2. Embed + Store
+    import chromadb
+    from chromadb.config import Settings
+
+    client = chromadb.PersistentClient(
+        path=str(CHROMA_DIR),
+        settings=Settings(anonymized_telemetry=False),
+    )
+
+    if args.rebuild:
+        try:
+            client.delete_collection(CHROMA_COLLECTION)
+            log.info(f"Deleted existing collection '{CHROMA_COLLECTION}' for rebuild.")
+        except Exception:
+            pass
+
     _, collection = get_or_create_collection()
     embed_and_store(chunks, collection)
 

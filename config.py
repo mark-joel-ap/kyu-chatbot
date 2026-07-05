@@ -24,18 +24,48 @@ for d in [RAW_DIR, CLEANED_DIR, CHUNKS_DIR, LOGS_DIR, CHROMA_DIR]:
     d.mkdir(parents=True, exist_ok=True)
 
 # ─── Scraper ──────────────────────────────────────────────────────────────────
+# Official KYU hosts we treat as in-scope for the knowledge base.
+KYU_HOSTS = (
+    "kyu.ac.ug",
+    "www.kyu.ac.ug",
+    "admissions.kyu.ac.ug",
+    "apply.kyu.ac.ug",
+)
+
 TARGET_URLS = [
     "https://www.kyu.ac.ug/",
+    "https://kyu.ac.ug/",
     "https://admissions.kyu.ac.ug/",
 ]
 
-ADMISSION_URL_PATTERNS = [
-    "/admissions", "/fees", "/programmes", "/requirements",
-    "/application", "/undergraduate", "/postgraduate",
-    "/international", "/scholarships", "/contacts",
-    "/about", "/faculties", "/schools", "/departments",
-    "/news", "/announcements", "/downloads",
+# High-value admission pages (seed list — always crawled even if link discovery fails)
+SEED_URLS = [
+    "https://kyu.ac.ug/about-admissions/",
+    "https://kyu.ac.ug/academic-programmes/",
+    "https://kyu.ac.ug/undergraduate-programmes/",
+    "https://kyu.ac.ug/graduate-programmes-2/",
+    "https://kyu.ac.ug/applications/",
+    "https://kyu.ac.ug/admission-lists/",
+    "https://kyu.ac.ug/fees-structures/",
+    "https://kyu.ac.ug/cut-off-point/",
+    "https://kyu.ac.ug/new-academic-calendar/",
+    "https://kyu.ac.ug/scholarship/",
+    "https://kyu.ac.ug/get-in-touch-contact-us-visit-us-kyambogo-university/",
+    "https://kyu.ac.ug/schools-faculties/",
+    "https://kyu.ac.ug/category/admissions/",
+    "https://kyu.ac.ug/office-of-the-bursar-finance-department/",
+    "https://ar.kyu.ac.ug/",
 ]
+
+ADMISSION_URL_PATTERNS = [
+    "admission", "apply", "application", "programme", "program",
+    "fees", "fee", "tuition", "requirement", "cut-off", "cutoff",
+    "undergraduate", "graduate", "postgraduate", "international",
+    "scholarship", "calendar", "contact", "facult", "school",
+    "handbook", "bursar", "registrar", "entry",
+]
+
+MIN_SCRAPED_PAGES = 20
 
 # ─── Chunking ─────────────────────────────────────────────────────────────────
 CHUNK_SIZE    = 800   # characters
@@ -50,7 +80,7 @@ TOP_K = 5  # number of chunks to retrieve per query
 
 # ─── LLM / Groq ───────────────────────────────────────────────────────────────
 GROQ_API_KEY  = os.getenv("GROQ_API_KEY", "")
-GROQ_MODEL    = os.getenv("GROQ_MODEL", "llama3-8b-8192")   # or llama3-70b-8192
+GROQ_MODEL    = os.getenv("GROQ_MODEL", "llama-3.1-8b-instant")
 GROQ_BASE_URL = "https://api.groq.com/openai/v1"
 MAX_TOKENS    = 512
 TEMPERATURE   = 0.1   # low = factual, deterministic answers

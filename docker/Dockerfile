@@ -15,8 +15,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     && rm -rf /var/lib/apt/lists/*
 
-COPY requirements.txt .
-RUN pip install --no-cache-dir --prefix=/install -r requirements.txt
+COPY requirements-runtime.txt .
+RUN pip install --upgrade pip && \
+    pip install --no-cache-dir --prefix=/install --default-timeout=300 \
+    --extra-index-url https://download.pytorch.org/whl/cpu \
+    torch \
+    -r requirements-runtime.txt
 
 # ── Stage 2: Runtime ──────────────────────────────────────────────────────────
 FROM python:3.11-slim AS runtime
@@ -30,9 +34,11 @@ COPY --from=builder /install /usr/local
 COPY config.py        ./config.py
 COPY backend/         ./backend/
 COPY embedder/        ./embedder/
+COPY frontend/        ./frontend/
+COPY chroma_db/       ./chroma_db/
 
 # Create directories (will be mounted as volumes in production)
-RUN mkdir -p data/raw data/cleaned data/chunks chroma_db logs
+RUN mkdir -p data/raw data/cleaned data/chunks logs
 
 # Non-root user for security
 RUN useradd -m -u 1000 kyu && chown -R kyu:kyu /app
@@ -49,9 +55,6 @@ EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=10s --start-period=20s --retries=3 \
     CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"
 
-# Use gunicorn + uvicorn workers for production
-CMD ["uvicorn", "backend.app:app", \
-     "--host", "0.0.0.0", \
-     "--port", "8000", \
-     "--workers", "2", \
-     "--loop", "asyncio"]
+# Run on platform-provided PORT (CraneCloud/Heroku-style), default 8000.
+# Use a shell form so ${PORT} is expanded.
+CMD ["sh", "-c", "uvicorn backend.app:app --host 0.0.0.0 --port ${PORT:-8000} --workers 1 --loop asyncio"]

@@ -38,6 +38,9 @@ log = logging.getLogger("cleaner")
 # ─── Regex patterns for noise removal ─────────────────────────────────────────
 # Navigation-like lines (short lines that are just links)
 _NAV_LINE = re.compile(r"^\s*\[([^\]]{1,40})\]\(https?://[^\)]+\)\s*$")
+_NAV_BULLET = re.compile(
+    r"^\s*[\*\-•]\s+(\[\s*\]\(https?://[^\)]+\)\s*)?\[[^\]]+\]\(https?://[^\)]+\)\s*$"
+)
 
 # Bare URLs on their own line (likely leftover nav/footer links)
 _BARE_URL = re.compile(r"^\s*https?://\S+\s*$", re.MULTILINE)
@@ -91,6 +94,8 @@ def remove_nav_footer_noise(text: str) -> str:
             continue
         # Skip lines that are purely nav links
         if _NAV_LINE.match(line):
+            continue
+        if _NAV_BULLET.match(line):
             continue
         # Skip social share links
         if _SOCIAL.search(line):

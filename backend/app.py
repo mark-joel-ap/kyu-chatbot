@@ -28,7 +28,8 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, field_validator
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
@@ -54,6 +55,8 @@ logging.basicConfig(
     ],
 )
 log = logging.getLogger("backend")
+
+FRONTEND_DIR = Path(__file__).parent.parent / "frontend"
 
 # ─── Rate limiter ─────────────────────────────────────────────────────────────
 limiter = Limiter(key_func=get_remote_address)
@@ -213,8 +216,34 @@ async def health() -> HealthResponse:
 
 @app.get("/", include_in_schema=False)
 async def root():
-    return JSONResponse(
-        {"message": "KYU Admissions Chatbot API. POST /chat to get started."}
+    """Redirect browsers to the chat widget demo."""
+    return RedirectResponse(url="/demo")
+
+
+@app.get("/demo", include_in_schema=False)
+async def demo_page():
+    """Simulated mirror page with the chat widget embedded."""
+    demo = FRONTEND_DIR / "demo.html"
+    if not demo.exists():
+        return JSONResponse(
+            {"message": "KYU Admissions Chatbot API. POST /chat to get started."}
+        )
+    return FileResponse(demo)
+
+
+@app.get("/preview", include_in_schema=False)
+async def widget_preview():
+    """Standalone widget preview page."""
+    widget = FRONTEND_DIR / "widget.html"
+    return FileResponse(widget)
+
+
+# Serve frontend assets (widget.html, inject.js, demo.html) for local dev / mirror embed
+if FRONTEND_DIR.is_dir():
+    app.mount(
+        "/frontend",
+        StaticFiles(directory=str(FRONTEND_DIR), html=True),
+        name="frontend",
     )
 
 

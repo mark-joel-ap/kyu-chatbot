@@ -126,6 +126,23 @@ uvicorn backend.app:app --host 0.0.0.0 --port 8000 --reload
 ```
 
 Test it:
+
+**Windows (PowerShell)** — use `curl.exe` or `Invoke-RestMethod` (plain `curl` is a PowerShell alias and breaks JSON quoting):
+
+```powershell
+# Health check
+Invoke-RestMethod http://localhost:8000/health
+
+# Chat (recommended)
+Invoke-RestMethod -Uri http://localhost:8000/chat -Method POST `
+  -ContentType "application/json" `
+  -Body '{"question": "What are the fees for Bachelor of Engineering?"}'
+
+# Or run the helper script:
+.\scripts\test-api.ps1
+```
+
+**macOS / Linux / Git Bash:**
 ```bash
 curl -X POST http://localhost:8000/chat \
   -H "Content-Type: application/json" \
@@ -291,7 +308,7 @@ chunks: list[RetrievedChunk] = retrieve(query="...", top_k=5)
   "status":          "ok",
   "vector_count":    342,
   "embedding_model": "all-MiniLM-L6-v2",
-  "llm_model":       "llama3-8b-8192"
+  "llm_model":       "llama-3.1-8b-instant"
 }
 ```
 
@@ -302,10 +319,13 @@ chunks: list[RetrievedChunk] = retrieve(query="...", top_k=5)
 | Problem | Solution |
 |---------|----------|
 | `GROQ_API_KEY not set` | Copy `.env.example` → `.env` and add your key |
+| Chat returns "unexpected error" | Groq may have retired the model — set `GROQ_MODEL=llama-3.1-8b-instant` in `.env` and restart uvicorn |
 | `chromadb collection not found` | Run `python embedder/embed.py` first |
 | `scraper captures < 20 pages` | Run `./scraper/mirror.sh` as a fallback |
 | `Backend returns 429` | Wait 60 s (rate limit is 10 req/min/IP) |
 | `Widget shows "Cannot connect"` | Ensure backend is running on port 8000 |
+| `curl` JSON error on Windows | Use `curl.exe` (not `curl`) or `Invoke-RestMethod`; see `scripts/test-api.ps1` |
+| `curl: Could not resolve host: are/the/...` | PowerShell split your JSON body — use single quotes around JSON or run `.\scripts\test-api.ps1` |
 | Slow first response | Embedding model is loading; subsequent responses are faster |
 | Docker: `permission denied on chroma_db` | `chmod -R 777 chroma_db data logs` |
 

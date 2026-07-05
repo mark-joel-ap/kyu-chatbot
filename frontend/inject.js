@@ -1,76 +1,86 @@
 /**
- * frontend/inject.js
- * ───────────────────
- * Single-script injection loader.
- *
- * Paste ONE line before </body> in mirror/index.html to embed the widget:
- *
- *   <script src="https://your-cdn-or-path/inject.js" data-api="http://localhost:8000"></script>
- *
- * Or with a hardcoded API URL:
- *
- *   <script>window.KYU_CHAT_API="http://localhost:8000";</script>
- *   <script src="/frontend/inject.js"></script>
- *
- * This loader:
- *   1. Reads the backend API URL from data-api attribute or window.KYU_CHAT_API.
- *   2. Injects the widget CSS inline.
- *   3. Injects the widget HTML into the page.
- *   4. Boots the widget JS.
+ * frontend/inject.js — embed KYU chat widget on mirrored pages.
  */
-
 (function () {
   "use strict";
 
-  // ── Determine API URL ─────────────────────────────────────────────────────
   const scriptTag = document.currentScript;
+  const sameOrigin =
+    window.location.protocol.startsWith("http") ? window.location.origin : null;
+
   const apiUrl =
     (scriptTag && scriptTag.dataset.api) ||
     window.KYU_CHAT_API ||
+    sameOrigin ||
     "http://localhost:8000";
 
   window.KYU_CHAT_API = apiUrl;
 
-  // ── Inject CSS ────────────────────────────────────────────────────────────
-  // In production, extract the <style> block from widget.html into widget.css
-  // and load it here. For simplicity, we inline a minimal set and load the rest
-  // from widget.html via fetch (if same origin) or serve widget.css separately.
+  const baseUrl =
+    scriptTag && scriptTag.src
+      ? scriptTag.src.replace(/inject\.js(\?.*)?$/, "")
+      : "/frontend/";
 
-  // Simple approach: fetch widget.html and inject its contents
-  fetch(
-    (scriptTag && scriptTag.src
-      ? scriptTag.src.replace("inject.js", "widget.html")
-      : "/frontend/widget.html")
-  )
-    .then((r) => r.text())
+  const widgetHtmlUrl = `${baseUrl}widget.html`;
+  const widgetCssUrl = `${baseUrl}css/widget.css`;
+  const widgetJsUrl = `${baseUrl}widget.js`;
+
+  function showLoadError(message) {
+    console.error("[KYU Chat]", message);
+    const banner = document.createElement("div");
+    banner.setAttribute("role", "alert");
+    banner.style.cssText =
+      "position:fixed;bottom:100px;right:28px;z-index:9998;max-width:320px;" +
+      "background:#ffebee;color:#b71c1c;padding:12px 16px;border-radius:8px;" +
+      "font:13px/1.4 system-ui,sans-serif;box-shadow:0 4px 16px rgba(0,0,0,0.15);";
+    banner.textContent = message;
+    document.body.appendChild(banner);
+  }
+
+  function loadStylesheet() {
+    if (document.querySelector('link[data-kyu-widget-css]')) return;
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = widgetCssUrl;
+    link.setAttribute("data-kyu-widget-css", "1");
+    document.head.appendChild(link);
+  }
+
+  function loadWidgetScript() {
+    const script = document.createElement("script");
+    script.src = widgetJsUrl;
+    script.async = false;
+    script.onerror = () => showLoadError("KYU Chat script failed to load.");
+    document.body.appendChild(script);
+  }
+
+  loadStylesheet();
+
+  fetch(widgetHtmlUrl)
+    .then((response) => {
+      if (!response.ok) throw new Error(`Failed to load widget (${response.status})`);
+      return response.text();
+    })
     .then((html) => {
-      // Extract <style> block
-      const styleMatch = html.match(/<style>([\s\S]*?)<\/style>/);
-      if (styleMatch) {
-        const style = document.createElement("style");
-        style.textContent = styleMatch[1];
-        document.head.appendChild(style);
+      const rootMatch = html.match(
+        /<div id="kyu-chat-root">[\s\S]*?<\/div>\s*<!-- \/kyu-chat-root -->/
+      );
+      if (!rootMatch) {
+        throw new Error("Widget markup not found in widget.html");
       }
 
-      // Extract widget HTML (div#kyu-chat-root + its children)
-      const bodyMatch = html.match(/<div id="kyu-chat-root">([\s\S]*?)<\/div>\s*<!--\s*\/kyu/);
-      const rootHtml = html.match(/<div id="kyu-chat-root">[\s\S]*?<!-- ═+\s*End of KYU Chat Widget/)?.[0];
+      const wrapper = document.createElement("div");
+      wrapper.innerHTML = rootMatch[0];
+      const root = wrapper.firstElementChild;
+      if (!root) throw new Error("Could not parse widget HTML");
 
-      if (rootHtml) {
-        const wrapper = document.createElement("div");
-        wrapper.innerHTML = rootHtml;
-        document.body.appendChild(wrapper.firstElementChild);
-      }
-
-      // Extract and execute <script> block
-      const scriptMatch = html.match(/<script>([\s\S]*?)<\/script>\s*<\/body>/);
-      if (scriptMatch) {
-        const script = document.createElement("script");
-        script.textContent = scriptMatch[1];
-        document.body.appendChild(script);
-      }
+      document.body.appendChild(root);
+      loadWidgetScript();
     })
     .catch((err) => {
-      console.warn("[KYU Chat] Could not load widget:", err);
+      showLoadError(
+        "KYU Chat could not load. Ensure the backend is running."
+      );
+      console.warn("[KYU Chat] Load error:", err);
     });
 })();

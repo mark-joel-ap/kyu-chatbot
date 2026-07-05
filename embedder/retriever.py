@@ -107,12 +107,25 @@ def retrieve(
         normalize_embeddings=True,
     ).tolist()
 
-    # Query ChromaDB
-    results = collection.query(
-        query_embeddings=query_embedding,
-        n_results=min(top_k, collection.count()),
-        include=["documents", "metadatas", "distances"],
-    )
+    # Query ChromaDB (retry once if collection was rebuilt while server was running)
+    try:
+        n_results = min(top_k, collection.count())
+        results = collection.query(
+            query_embeddings=query_embedding,
+            n_results=n_results,
+            include=["documents", "metadatas", "distances"],
+        )
+    except Exception as exc:
+        if "does not exist" not in str(exc):
+            raise
+        log.warning("Stale ChromaDB collection handle – reloading …")
+        _load_resources.cache_clear()
+        model, collection = _load_resources()
+        results = collection.query(
+            query_embeddings=query_embedding,
+            n_results=min(top_k, collection.count()),
+            include=["documents", "metadatas", "distances"],
+        )
 
     chunks: list[RetrievedChunk] = []
 

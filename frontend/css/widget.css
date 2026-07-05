@@ -1,0 +1,434 @@
+/* KYU Admissions Chat Widget — scoped to #kyu-chat-root */
+
+@import url("https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;500;600;700&display=swap");
+
+#kyu-chat-root {
+  --kyu-primary: #0a2d5c;
+  --kyu-primary-light: #134078;
+  --kyu-accent: #f0b429;
+  --kyu-bg: #ffffff;
+  --kyu-surface: #f8fafc;
+  --kyu-border: #e2e8f0;
+  --kyu-text: #1e293b;
+  --kyu-text-muted: #64748b;
+  --kyu-shadow: 0 12px 40px rgba(10, 45, 92, 0.15);
+  --kyu-radius: 12px;
+  --kyu-z: 9999;
+  font-family: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+#kyu-chat-root * {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: inherit;
+}
+
+/* ── FAB ─────────────────────────────────────────────────────────── */
+#kyu-chat-fab-wrap {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: var(--kyu-z);
+}
+
+#kyu-chat-btn {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--kyu-primary);
+  border: none;
+  cursor: pointer;
+  box-shadow: var(--kyu-shadow);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, transform 0.15s;
+  outline: none;
+}
+
+#kyu-chat-btn:hover {
+  background: var(--kyu-primary-light);
+  transform: translateY(-1px);
+}
+
+#kyu-chat-btn:active { transform: translateY(0); }
+
+#kyu-chat-btn svg {
+  width: 24px;
+  height: 24px;
+  fill: white;
+}
+
+#kyu-chat-btn .icon-close { display: none; }
+#kyu-chat-btn.open .icon-open { display: none; }
+#kyu-chat-btn.open .icon-close { display: block; }
+
+/* ── Chat window ─────────────────────────────────────────────────── */
+#kyu-chat-window {
+  position: fixed;
+  bottom: 92px;
+  right: 24px;
+  z-index: var(--kyu-z);
+  width: 380px;
+  max-width: calc(100vw - 32px);
+  height: 560px;
+  max-height: calc(100vh - 100px);
+  background: var(--kyu-bg);
+  border-radius: var(--kyu-radius);
+  box-shadow: var(--kyu-shadow);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--kyu-border);
+  opacity: 0;
+  transform: translateY(12px);
+  pointer-events: none;
+  transition: opacity 0.22s ease, transform 0.22s ease;
+}
+
+#kyu-chat-window.visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: all;
+}
+
+/* ── Header ──────────────────────────────────────────────────────── */
+#kyu-header {
+  background: var(--kyu-primary);
+  color: white;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-shrink: 0;
+  border-bottom: 3px solid var(--kyu-accent);
+}
+
+#kyu-header-title {
+  font-weight: 600;
+  font-size: 15px;
+  line-height: 1.3;
+}
+
+#kyu-header-subtitle {
+  font-size: 12px;
+  opacity: 0.8;
+  margin-top: 1px;
+  font-weight: 400;
+}
+
+#kyu-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+#kyu-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 500;
+  opacity: 0.9;
+}
+
+#kyu-status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #4caf50;
+  flex-shrink: 0;
+}
+
+#kyu-minimize-btn {
+  background: transparent;
+  border: none;
+  color: white;
+  width: 28px;
+  height: 28px;
+  cursor: pointer;
+  font-size: 22px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.85;
+  transition: opacity 0.15s;
+}
+
+#kyu-minimize-btn:hover { opacity: 1; }
+
+/* ── Messages ────────────────────────────────────────────────────── */
+#kyu-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: var(--kyu-surface);
+  scroll-behavior: smooth;
+}
+
+#kyu-messages::-webkit-scrollbar { width: 4px; }
+#kyu-messages::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 2px;
+}
+
+.kyu-msg {
+  display: flex;
+  flex-direction: column;
+  max-width: 88%;
+  animation: kyu-fade-in 0.2s ease;
+}
+
+.kyu-msg.user {
+  align-self: flex-end;
+  align-items: flex-end;
+}
+
+.kyu-msg.bot {
+  align-self: flex-start;
+  align-items: flex-start;
+}
+
+@keyframes kyu-fade-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.kyu-bubble {
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-size: 14px;
+  line-height: 1.55;
+  word-break: break-word;
+}
+
+.kyu-msg.bot .kyu-bubble {
+  background: var(--kyu-bg);
+  color: var(--kyu-text);
+  border: 1px solid var(--kyu-border);
+}
+
+.kyu-msg.user .kyu-bubble {
+  background: var(--kyu-primary);
+  color: white;
+}
+
+.kyu-bubble ul {
+  margin: 6px 0 4px 18px;
+  padding: 0;
+}
+
+.kyu-bubble li { margin-bottom: 3px; }
+
+.kyu-bubble a {
+  color: var(--kyu-primary-light);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.kyu-msg.user .kyu-bubble a { color: #fff; }
+
+.kyu-msg-time {
+  font-size: 11px;
+  color: var(--kyu-text-muted);
+  margin-top: 4px;
+  padding: 0 2px;
+}
+
+.kyu-sources {
+  font-size: 11px;
+  color: var(--kyu-text-muted);
+  margin-top: 4px;
+  padding: 0 2px;
+  line-height: 1.4;
+}
+
+.kyu-sources strong {
+  font-weight: 600;
+  color: var(--kyu-text-muted);
+}
+
+/* ── Typing ──────────────────────────────────────────────────────── */
+#kyu-typing-wrap {
+  padding: 0 16px 8px;
+  background: var(--kyu-surface);
+  flex-shrink: 0;
+}
+
+#kyu-typing {
+  display: none;
+}
+
+#kyu-typing.show { display: block; }
+
+.kyu-typing-bubble {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 12px 14px;
+  background: var(--kyu-bg);
+  border: 1px solid var(--kyu-border);
+  border-radius: 10px;
+}
+
+.kyu-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--kyu-text-muted);
+  animation: kyu-bounce 1.2s infinite;
+}
+
+.kyu-dot:nth-child(2) { animation-delay: 0.15s; }
+.kyu-dot:nth-child(3) { animation-delay: 0.3s; }
+
+@keyframes kyu-bounce {
+  0%, 80%, 100% { opacity: 0.35; }
+  40% { opacity: 1; }
+}
+
+/* ── Suggestions ─────────────────────────────────────────────────── */
+#kyu-suggestions {
+  padding: 10px 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 16px;
+  background: var(--kyu-bg);
+  border-top: 1px solid var(--kyu-border);
+  flex-shrink: 0;
+}
+
+#kyu-suggestions.hidden { display: none; }
+
+.kyu-suggestion {
+  background: none;
+  border: none;
+  color: var(--kyu-primary);
+  font-size: 13px;
+  font-weight: 500;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color 0.15s;
+}
+
+.kyu-suggestion:hover {
+  color: var(--kyu-primary-light);
+}
+
+/* ── Input ───────────────────────────────────────────────────────── */
+#kyu-input-area {
+  padding: 12px 16px;
+  background: var(--kyu-bg);
+  border-top: 1px solid var(--kyu-border);
+  flex-shrink: 0;
+}
+
+#kyu-input-shell {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  border: 1px solid var(--kyu-border);
+  border-radius: 8px;
+  padding: 4px 4px 4px 12px;
+  background: var(--kyu-bg);
+  transition: border-color 0.15s;
+}
+
+#kyu-input-shell:focus-within {
+  border-color: var(--kyu-primary);
+}
+
+#kyu-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  padding: 8px 0;
+  font-size: 14px;
+  color: var(--kyu-text);
+  resize: none;
+  max-height: 88px;
+  outline: none;
+  line-height: 1.45;
+}
+
+#kyu-input::placeholder { color: var(--kyu-text-muted); }
+
+#kyu-send {
+  width: 36px;
+  height: 36px;
+  border-radius: 6px;
+  background: var(--kyu-primary);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, opacity 0.15s;
+  flex-shrink: 0;
+}
+
+#kyu-send:hover:not(:disabled) { background: var(--kyu-primary-light); }
+#kyu-send svg { width: 16px; height: 16px; fill: white; }
+#kyu-send:disabled { opacity: 0.35; cursor: not-allowed; }
+
+#kyu-char-count {
+  font-size: 11px;
+  color: var(--kyu-text-muted);
+  text-align: right;
+  margin-top: 4px;
+}
+
+/* ── Footer ──────────────────────────────────────────────────────── */
+#kyu-footer {
+  text-align: center;
+  font-size: 11px;
+  color: var(--kyu-text-muted);
+  padding: 8px 16px;
+  background: var(--kyu-surface);
+  border-top: 1px solid var(--kyu-border);
+  flex-shrink: 0;
+}
+
+.kyu-error { color: #b91c1c !important; }
+
+/* ── Mobile ──────────────────────────────────────────────────────── */
+@media (max-width: 480px) {
+  #kyu-chat-window {
+    bottom: 0;
+    right: 0;
+    left: 0;
+    width: 100%;
+    max-width: 100%;
+    height: 100%;
+    max-height: 100%;
+    border-radius: 0;
+    border: none;
+  }
+
+  #kyu-chat-fab-wrap {
+    bottom: 16px;
+    right: 16px;
+  }
+
+  #kyu-suggestions {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    gap: 16px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  #kyu-suggestions::-webkit-scrollbar { display: none; }
+
+  .kyu-suggestion { flex-shrink: 0; }
+}
