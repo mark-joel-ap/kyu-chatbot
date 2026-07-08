@@ -3,17 +3,17 @@
 @import url("https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;500;600;700&display=swap");
 
 :root {
-  --kyu-navy: #0a2d5c;
-  --kyu-navy-dark: #061e3d;
-  --kyu-gold: #f0b429;
-  --kyu-gold-light: #ffd86a;
+  --kyu-navy: #3fa5ed;        /* Vibrant Sky Blue for the main menu bar */
+  --kyu-navy-dark: #ffffff;   /* Pure White background for the top bar */
+  --kyu-gold: #e29500;       
+  --kyu-gold-light: #1b84e6;  /* Deeper blue accent for menu hover indicators */
   --kyu-red: #c0392b;
-  --kyu-text: #2c3e50;
-  --kyu-muted: #6b7c93;
-  --kyu-bg: #f5f7fa;
+  --kyu-text: #2c4a7c;        /* Deep Royal Blue for "Kyambogo University" title */
+  --kyu-muted: #3fa5ed;       
+  --kyu-bg: #f8fafc;
   --kyu-white: #ffffff;
   --kyu-border: #e2e8f0;
-  --kyu-shadow: 0 4px 24px rgba(10, 45, 92, 0.08);
+  --kyu-shadow: 0 4px 24px rgba(63, 165, 237, 0.06);
   --kyu-max: 1200px;
   --font: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
 }
@@ -32,16 +32,21 @@ a:hover { color: var(--kyu-gold); }
 
 /* ── Top utility bar ─────────────────────────────────────────────── */
 .kyu-topbar {
-  background: var(--kyu-navy-dark);
-  color: rgba(255, 255, 255, 0.9);
-  font-size: 0.8rem;
-  padding: 0.45rem 1.5rem;
+  background: var(--kyu-white);
+  color: var(--kyu-navy);
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 0.6rem 1.5rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
   gap: 0.5rem;
+  border-bottom: 1px solid #f0f4f8;
 }
+
+.kyu-topbar a { color: var(--kyu-navy) !important; }
+.kyu-topbar a:hover { color: var(--kyu-text) !important; }
 
 .kyu-topbar a { color: rgba(255, 255, 255, 0.85); }
 .kyu-topbar a:hover { color: var(--kyu-gold); }
@@ -182,14 +187,19 @@ a:hover { color: var(--kyu-gold); }
 .kyu-nav-menu > li > a,
 .kyu-nav-menu > li > span {
   display: block;
-  padding: 0.9rem 1rem;
-  color: rgba(255, 255, 255, 0.92);
-  font-size: 0.88rem;
+  padding: 0.9rem 1.2rem;
+  color: #ffffff; /* Forces main menu text to stay clean white */
+  font-size: 0.9rem;
   font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  border-bottom: 3px solid transparent;
-  transition: background 0.15s, border-color 0.15s;
+  text-transform: capitalize; /* Changes ALL CAPS to standard capitalized look */
+  letter-spacing: 0.02em;
+  transition: background 0.15s;
+}
+
+.kyu-nav-menu > li > a:hover,
+.kyu-nav-menu > li > a.active {
+  background: rgba(255, 255, 255, 0.18);
+  color: #ffffff;
 }
 
 .kyu-nav-menu > li > a:hover,
