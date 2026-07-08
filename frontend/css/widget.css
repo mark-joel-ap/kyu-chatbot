@@ -8,7 +8,9 @@
   --kyu-accent: #f0b429;
   --kyu-bg: #ffffff;
   --kyu-surface: #f8fafc;
-  --kyu-border: #e2e8f0;
+  --kyu-border: #d1d9e6;
+  --kyu-border-strong: #94a3b8;
+  --kyu-user-border: #082448;
   --kyu-text: #1e293b;
   --kyu-text-muted: #64748b;
   --kyu-shadow: 0 12px 40px rgba(10, 45, 92, 0.15);
@@ -38,7 +40,7 @@
   height: 56px;
   border-radius: 50%;
   background: var(--kyu-primary);
-  border: none;
+  border: 2px solid rgba(255, 255, 255, 0.92);
   cursor: pointer;
   box-shadow: var(--kyu-shadow);
   display: flex;
@@ -81,7 +83,7 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  border: 1px solid var(--kyu-border);
+  border: 1.5px solid var(--kyu-border-strong);
   opacity: 0;
   transform: translateY(12px);
   pointer-events: none;
@@ -166,6 +168,7 @@
 #kyu-messages {
   flex: 1;
   overflow-y: auto;
+  overflow-x: hidden;
   padding: 16px;
   display: flex;
   flex-direction: column;
@@ -183,7 +186,8 @@
 .kyu-msg {
   display: flex;
   flex-direction: column;
-  max-width: 88%;
+  max-width: 86%;
+  min-width: 0;
   animation: kyu-fade-in 0.2s ease;
 }
 
@@ -203,35 +207,55 @@
 }
 
 .kyu-bubble {
-  padding: 10px 14px;
-  border-radius: 10px;
+  display: block;
+  width: fit-content;
+  max-width: 100%;
+  min-width: 0;
+  padding: 11px 15px;
+  border-radius: 14px;
   font-size: 14px;
   line-height: 1.55;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
   word-break: break-word;
+  hyphens: auto;
+  -webkit-hyphens: auto;
+  white-space: normal;
 }
 
 .kyu-msg.bot .kyu-bubble {
   background: var(--kyu-bg);
   color: var(--kyu-text);
-  border: 1px solid var(--kyu-border);
+  border: 1.5px solid var(--kyu-border-strong);
+  border-bottom-left-radius: 4px;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
 }
 
 .kyu-msg.user .kyu-bubble {
   background: var(--kyu-primary);
   color: white;
+  border: 1.5px solid var(--kyu-user-border);
+  border-bottom-right-radius: 4px;
+  box-shadow: 0 1px 2px rgba(10, 45, 92, 0.12);
 }
 
 .kyu-bubble ul {
   margin: 6px 0 4px 18px;
   padding: 0;
+  overflow-wrap: break-word;
 }
 
-.kyu-bubble li { margin-bottom: 3px; }
+.kyu-bubble li {
+  margin-bottom: 4px;
+  overflow-wrap: break-word;
+}
 
 .kyu-bubble a {
   color: var(--kyu-primary-light);
   text-decoration: underline;
   text-underline-offset: 2px;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .kyu-msg.user .kyu-bubble a { color: #fff; }
@@ -248,7 +272,10 @@
   color: var(--kyu-text-muted);
   margin-top: 4px;
   padding: 0 2px;
-  line-height: 1.4;
+  line-height: 1.45;
+  max-width: 100%;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 .kyu-sources strong {
@@ -273,10 +300,12 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  padding: 12px 14px;
+  padding: 12px 15px;
   background: var(--kyu-bg);
-  border: 1px solid var(--kyu-border);
-  border-radius: 10px;
+  border: 1.5px solid var(--kyu-border-strong);
+  border-radius: 14px;
+  border-bottom-left-radius: 4px;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
 }
 
 .kyu-dot {
@@ -297,39 +326,46 @@
 
 /* ── Suggestions ─────────────────────────────────────────────────── */
 #kyu-suggestions {
-  padding: 10px 16px;
+  padding: 12px 16px;
   display: flex;
   flex-wrap: wrap;
-  gap: 12px 16px;
+  gap: 8px;
   background: var(--kyu-bg);
-  border-top: 1px solid var(--kyu-border);
+  border-top: 1.5px solid var(--kyu-border);
   flex-shrink: 0;
 }
 
 #kyu-suggestions.hidden { display: none; }
 
 .kyu-suggestion {
-  background: none;
-  border: none;
+  background: var(--kyu-surface);
+  border: 1.5px solid var(--kyu-border);
+  border-radius: 999px;
   color: var(--kyu-primary);
   font-size: 13px;
   font-weight: 500;
-  padding: 0;
+  line-height: 1.35;
+  padding: 7px 13px;
   cursor: pointer;
-  text-decoration: underline;
-  text-underline-offset: 2px;
-  transition: color 0.15s;
+  text-align: left;
+  white-space: normal;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  max-width: 100%;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
 }
 
 .kyu-suggestion:hover {
   color: var(--kyu-primary-light);
+  background: #eef4fb;
+  border-color: var(--kyu-border-strong);
 }
 
 /* ── Input ───────────────────────────────────────────────────────── */
 #kyu-input-area {
   padding: 12px 16px;
   background: var(--kyu-bg);
-  border-top: 1px solid var(--kyu-border);
+  border-top: 1.5px solid var(--kyu-border);
   flex-shrink: 0;
 }
 
@@ -337,15 +373,16 @@
   display: flex;
   align-items: flex-end;
   gap: 8px;
-  border: 1px solid var(--kyu-border);
-  border-radius: 8px;
+  border: 1.5px solid var(--kyu-border-strong);
+  border-radius: 10px;
   padding: 4px 4px 4px 12px;
   background: var(--kyu-bg);
-  transition: border-color 0.15s;
+  transition: border-color 0.15s, box-shadow 0.15s;
 }
 
 #kyu-input-shell:focus-within {
   border-color: var(--kyu-primary);
+  box-shadow: 0 0 0 3px rgba(10, 45, 92, 0.1);
 }
 
 #kyu-input {
@@ -366,9 +403,9 @@
 #kyu-send {
   width: 36px;
   height: 36px;
-  border-radius: 6px;
+  border-radius: 8px;
   background: var(--kyu-primary);
-  border: none;
+  border: 1.5px solid var(--kyu-user-border);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -395,11 +432,15 @@
   color: var(--kyu-text-muted);
   padding: 8px 16px;
   background: var(--kyu-surface);
-  border-top: 1px solid var(--kyu-border);
+  border-top: 1.5px solid var(--kyu-border);
   flex-shrink: 0;
 }
 
-.kyu-error { color: #b91c1c !important; }
+.kyu-msg.bot .kyu-bubble.kyu-error {
+  color: #991b1b;
+  background: #fef2f2;
+  border-color: #fca5a5;
+}
 
 /* ── Mobile ──────────────────────────────────────────────────────── */
 @media (max-width: 480px) {
@@ -420,15 +461,16 @@
     right: 16px;
   }
 
-  #kyu-suggestions {
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    gap: 16px;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
+  .kyu-msg {
+    max-width: 92%;
   }
 
-  #kyu-suggestions::-webkit-scrollbar { display: none; }
+  #kyu-suggestions {
+    gap: 8px;
+  }
 
-  .kyu-suggestion { flex-shrink: 0; }
+  .kyu-suggestion {
+    flex: 1 1 calc(50% - 4px);
+    min-width: 0;
+  }
 }
