@@ -12,6 +12,7 @@ markdownify>=0.11.6      # HTML → Markdown fallback
 langchain>=0.2.0
 langchain-community>=0.2.0
 langchain-text-splitters>=0.2.0
+pypdf>=5.0.0              # FAQ PDF ingestion (scripts/ingest_faq_pdf.py)
 
 # ─── Embeddings & Vector DB ───────────────────────────────────────────────────
 sentence-transformers>=2.7.0

@@ -1,0 +1,15 @@
+.git
+.gitignore
+.venv
+__pycache__
+*.pyc
+*.pyo
+.env
+logs/
+data/raw/
+data/cleaned/
+data/chunks/
+mirror/
+terminals/
+*.md
+!README.md
